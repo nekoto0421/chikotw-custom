@@ -26,6 +26,9 @@ class chiko_Main{
 			case 'album':
 				$this->AlbumPage();
 				break;
+			case 'post-wall':
+				$this->PostWallPage();
+				break;	
 		}
 		$output =ob_get_clean();
 		return $output;
@@ -38,6 +41,22 @@ class chiko_Main{
 	        $content .= do_shortcode($shortcode);
 	    }
 	    return $content;
+	}
+
+	function PostWallPage(){
+		wp_register_script('postermywall_script','https://d1csarkz8obe9u.cloudfront.net/plugins/editor/postermywall-editor-v3.js');
+		wp_enqueue_script('postermywall_script');
+
+		wp_register_script('extension_script','chrome-extension://fnjhmkhhmkbjkkabndcnnogagogbneec/in-page.js');
+		wp_enqueue_script('extension_script');
+
+		wp_register_script('postermywall_cus_script',CHIKO_URL.'/js/post-my-wall.js');
+		wp_enqueue_script('postermywall_cus_script');
+
+		wp_register_style('postermywall_style', CHIKO_URL.'/css/post-my-wall.css');
+		wp_enqueue_style('postermywall_style');
+
+		include CHIKO_DIR.'/templates/post-my-wall.php';
 	}
 
 	function MemberBuyPage(){
