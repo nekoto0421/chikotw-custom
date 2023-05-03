@@ -24,6 +24,18 @@ function CHIKOMain(){
 add_action('plugins_loaded', 'LoadCHIKO_Class');
 
 function CHIKO_activation() {
+    if(!defined('ABSPATH'))exit;
+    global $wpdb;
+    require_once(ABSPATH.'wp-admin/includes/upgrade.php');
+    $table_name=$wpdb->prefix.'chiko_discount';
+    if($wpdb->get_var("SHOW TABLES LIKE '$table_name'")!=$table_name){
+        $sql="CREATE TABLE `wp_chiko_discount` (
+              `member_plan_id` int(11) NOT NULL,
+              `discount` int(11) NOT NULL,
+              PRIMARY KEY (`member_plan_id`,`discount`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;";
+        dbDelta($sql);
+    }
 }
  
 register_activation_hook( __FILE__, 'CHIKO_activation' );
