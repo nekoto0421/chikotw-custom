@@ -7,8 +7,13 @@ class chiko_Main{
 		add_filter('the_content', array($this,'add_shortcode_to_listing_pages'));
 		wp_register_script('jquery','https://code.jquery.com/jquery-3.6.0.js');
 		wp_enqueue_script('jquery');
-		wp_register_script('album_script',CHIKO_URL.'/js/album.js');
-		wp_enqueue_script('album_script');
+      
+      	$current_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
+	    if (strpos($current_url, 'listing') !== false) {
+	       wp_register_script('album_script',CHIKO_URL.'/js/album.js');
+		   wp_enqueue_script('album_script');
+	    }
+		
 
 		wp_register_script('display_script',CHIKO_URL.'/js/display.js');
 		wp_enqueue_script('display_script');
