@@ -29,10 +29,30 @@ function CHIKO_activation() {
     require_once(ABSPATH.'wp-admin/includes/upgrade.php');
     $table_name=$wpdb->prefix.'chiko_discount';
     if($wpdb->get_var("SHOW TABLES LIKE '$table_name'")!=$table_name){
-        $sql="CREATE TABLE `wp_chiko_discount` (
+        $sql="CREATE TABLE `{$wpdb->prefix}chiko_discount` (
               `member_plan_id` int(11) NOT NULL,
               `discount` int(11) NOT NULL,
               PRIMARY KEY (`member_plan_id`,`discount`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;";
+        dbDelta($sql);
+    }
+
+    $table_name=$wpdb->prefix.'qa_content';
+    if($wpdb->get_var("SHOW TABLES LIKE '$table_name'")!=$table_name){
+        $sql="CREATE TABLE `{$wpdb->prefix}qa_content` (
+          `qa_id` int(11) NOT NULL,
+          `content` text NOT NULL,
+          PRIMARY KEY (`member_plan_id`,`discount`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;";
+        dbDelta($sql);
+    }
+
+    $table_name=$wpdb->prefix.'qa_title';
+    if($wpdb->get_var("SHOW TABLES LIKE '$table_name'")!=$table_name){
+        $sql="CREATE TABLE `{$wpdb->prefix}qa_title` (
+              `ID` int(11) NOT NULL AUTO_INCREMENT,
+              `parent_id` int(11) DEFAULT NULL,
+              `content` text NOT NULL
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;";
         dbDelta($sql);
     }

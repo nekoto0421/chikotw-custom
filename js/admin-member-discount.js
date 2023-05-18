@@ -1,5 +1,5 @@
 jQuery(function($) {
-	$(document).on("click", ".save-discount", function() {
+	$(document).on("click", ".save-sub", function() {
 		let dataId=$(this).closest("tr").attr("data-id");
 		let disCount=$(this).closest("td").find("input").val();
 		$.ajax({

@@ -25,6 +25,97 @@ class chiko_Main{
 		add_action( 'woocommerce_cart_calculate_fees', array($this,'chiko_member_discount_price'));
 
 		add_action('wp_ajax_update_member_discount', array($this, 'update_member_discount'));
+
+		add_action('wp_ajax_update_sub_data', array($this, 'update_sub_data'));
+
+		add_action('wp_ajax_get_sub_data', array($this, 'get_sub_data'));
+
+		add_action('wp_ajax_del_sub_data', array($this, 'del_sub_data'));
+
+		add_action('wp_ajax_get_main_data', array($this, 'get_main_data'));
+
+		add_action('wp_ajax_update_main_data', array($this, 'update_main_data'));
+
+		add_action('wp_ajax_del_main_data', array($this, 'del_main_data'));
+	}
+	function del_main_data(){
+		global $wpdb;
+		$sql = "SELECT * FROM `{$wpdb->prefix}qa_title` WHERE parent_id = '".$_POST['ID']."'";
+		$datas = $wpdb->get_results($sql);
+		$sql="DELETE FROM `{$wpdb->prefix}qa_title` WHERE ID='".$_POST['ID']."' OR parent_id = '".$_POST['ID']."'";
+		$wpdb->query($sql);
+		foreach($datas as $data){
+			$sql="DELETE FROM `{$wpdb->prefix}qa_content` WHERE qa_id='".$data->ID."'";
+			$wpdb->query($sql);
+		}
+		echo json_encode(array('success'=>'刪除成功'));
+		exit();
+	}
+	function get_main_data(){
+		global $wpdb;
+		$sql="SELECT content FROM {$wpdb->prefix}qa_title where ID='".$_POST['ID']."'";
+		$maindata = $wpdb->get_row($sql);
+		echo json_encode(array('mainTitle'=>$maindata->content));
+		exit();
+	}
+	function update_main_data(){
+		global $wpdb;
+		if(empty($_POST['ID'])){
+			$sql="INSERT INTO `{$wpdb->prefix}qa_title`(`content`) VALUES ('".$_POST['mainTitle']."')";
+			$wpdb->query($sql);
+		}
+		else{
+			$sql="UPDATE `{$wpdb->prefix}qa_title` SET `content`='".$_POST['mainTitle']."' WHERE `ID`='".$_POST['ID']."'";
+			$wpdb->query($sql);
+		}
+		echo json_encode(array('success'=>'更新成功','title'=>$_POST['mainTitle']));
+		exit();
+	}
+	function del_sub_data(){
+		global $wpdb;
+		$sql="DELETE FROM `{$wpdb->prefix}qa_title` WHERE ID='".$_POST['ID']."'";
+		$wpdb->query($sql);
+		$sql="DELETE FROM `{$wpdb->prefix}qa_content` WHERE qa_id='".$_POST['ID']."'";
+		$wpdb->query($sql);
+		echo json_encode(array('success'=>'刪除成功'));
+		exit();
+	}
+	function get_sub_data(){
+		global $wpdb;
+		$sql="SELECT a.content as title,b.content as editorContent  FROM {$wpdb->prefix}qa_title a
+		left join {$wpdb->prefix}qa_content b 
+		on a.ID = b.qa_id 
+		where a.ID='".$_POST['ID']."'";
+		$subdata = $wpdb->get_row($sql);
+		echo json_encode(array('subTitle'=>$subdata->title,'editorContent'=>$subdata->editorContent));
+		exit();
+	}
+
+	function update_sub_data(){
+		global $wpdb;
+		$editID=$_POST['ID'];
+		if(empty($_POST['ID'])){
+			$sql="INSERT INTO `{$wpdb->prefix}qa_title`(`parent_id`,`content`) VALUES ('".$_POST['mainId']."','".$_POST['subTitle']."')";
+			$wpdb->query($sql);
+			$sql="SELECT `ID` FROM `{$wpdb->prefix}qa_title` WHERE `parent_id`='".$_POST['mainId']."' and content = '".$_POST['subTitle']."'";
+			$ID=$wpdb->get_var($sql);
+			$editID=$ID;
+		}
+		else{
+			$sql="UPDATE `{$wpdb->prefix}qa_title` SET `content`='".$_POST['subTitle']."' WHERE `ID`='".$editID."'";
+			$wpdb->query($sql);
+		}
+		$sql= "SELECT count(*) FROM {$wpdb->prefix}qa_content WHERE qa_id='".$editID."'";
+		$count = $wpdb-> get_var($sql);
+		if($count == 0){
+			$sql="INSERT INTO `{$wpdb->prefix}qa_content`(`qa_id`, `content`) VALUES ('".$editID."','".$_POST['editorContent']."')";
+		}
+		else{
+			$sql="UPDATE `{$wpdb->prefix}qa_content` SET `content`='".$_POST['editorContent']."' WHERE `qa_id`='".$editID."'";
+		}
+		$wpdb->query($sql);
+		echo json_encode(array('success'=>'更新成功','title'=>$_POST['subTitle']));
+		exit();
 	}
 	function update_member_discount(){
 		global $wpdb;
@@ -106,7 +197,32 @@ class chiko_Main{
 
 	function AdminMenu(){
 		add_menu_page('HivePress會員折扣', __('會員折扣'), __('manage_options'), 'chiko-class_main',array($this,'AdminMainPage'),'dashicons-admin-users', 56);
+
+		add_menu_page('QA設定', __('QA設定'), __('manage_options'), 'qa-class_main',array($this,'QAPage'),'dashicons-editor-ul', 56);
 	}
+
+	function QAPage(){
+		global $wpdb;
+		wp_register_script('sweetalert_script','https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/11.1.9/sweetalert2.all.min.js');
+		wp_enqueue_script('sweetalert_script');
+		wp_register_script('bootstrap_script','https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.min.js');
+		wp_register_script('bootstrap_script','https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.min.js');
+		wp_enqueue_script('bootstrap_script');
+		wp_register_style('bootstrap_style', 'https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css');
+		wp_enqueue_style('bootstrap_style');
+
+		wp_register_script('admin_qa_script', CHIKO_URL.'js/admin-qa.js');
+		wp_enqueue_script('admin_qa_script');
+		wp_localize_script(	
+			'admin_qa_script', 
+			'Chiko_vars',
+			array(
+				'ajaxurl' => admin_url('admin-ajax.php'),
+			)
+		);
+		include CHIKO_DIR."/templates/admin-qa.php";
+	}
+
 	function AdminMainPage(){
 		global $wpdb;
 		wp_register_script('sweetalert_script','https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/11.1.9/sweetalert2.all.min.js');
