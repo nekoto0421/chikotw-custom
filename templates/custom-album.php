@@ -1,16 +1,18 @@
-<div class="custom-track" style="display:none;">
-    <div class="main-image">
-        <img id="image1" src="" alt="" loading="lazy">
-    </div>
-    <div class="sub-images">
-        <div class="image-row">
-            <img id="image2" src="" alt="" loading="lazy">
-            <img id="image3" src="" alt="" loading="lazy">
+<div class="custom-track-out" style="display:none;">
+    <div class="custom-track" style="display:flex;">
+        <div class="main-image">
+            <img id="image1" class="custom-img" src="" alt="" loading="lazy">
         </div>
-        <!-- Add another image row for 2x2 layout -->
-        <div class="image-row">
-            <img id="image4" src="" alt="" loading="lazy">
-            <img id="image5" src="" alt="" loading="lazy">
+        <div class="sub-images">
+            <div class="image-row">
+                <img id="image2" class="custom-img" src="" alt="" loading="lazy">
+                <img id="image3" class="custom-img" src="" alt="" loading="lazy">
+            </div>
+            <!-- Add another image row for 2x2 layout -->
+            <div class="image-row">
+                <img id="image4" class="custom-img" src="" alt="" loading="lazy">
+                <img id="image5" class="custom-img" src="" alt="" loading="lazy">
+            </div>
         </div>
     </div>
 </div>
